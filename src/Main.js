@@ -9,7 +9,7 @@ import Gallery from "./pages/Gallery";
 
 const Utama = () => (
     <Switch>
-        <Route exact path="/beranda" component={Beranda} />
+        <Route exact path="/" component={Beranda} />
         <Route path="/tentangsaya" component={TentangSaya} />
         <Route path="/karya" component={Karya} />
         <Route path="/kontak" component={Kontak} />
