@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 import $ from "jquery";
 import Card from "../components/Card";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -8,21 +8,21 @@ class Gallery extends Component {
         super()
         this.state = {
             buku: [{
-                    isbn: "12345",
-                    judul: "Bumi",
-                    penulis: "Tere Liye",
-                    penerbit: "CV Harapan Kita",
-                    harga: 90000,
-                    cover: "https://i.pinimg.com/564x/e1/df/fc/e1dffcf4f2057935640e8a498dc61db9.jpg"
-                },
-                {
-                    isbn: "12346",
-                    judul: "Bulan",
-                    penulis: "Tere Liye",
-                    penerbit: "CV Nusa Bangsa",
-                    harga: 80000,
-                    cover: "https://i.pinimg.com/564x/53/67/d3/5367d3db20b2a17248c3885fcf56e58c.jpg"
-                },
+                isbn: "12345",
+                judul: "Bumi",
+                penulis: "Tere Liye",
+                penerbit: "CV Harapan Kita",
+                harga: 90000,
+                cover: "https://i.pinimg.com/564x/e1/df/fc/e1dffcf4f2057935640e8a498dc61db9.jpg"
+            },
+            {
+                isbn: "12346",
+                judul: "Bulan",
+                penulis: "Tere Liye",
+                penerbit: "CV Nusa Bangsa",
+                harga: 80000,
+                cover: "https://i.pinimg.com/564x/53/67/d3/5367d3db20b2a17248c3885fcf56e58c.jpg"
+            },
             ],
 
             action: "",
@@ -130,18 +130,92 @@ class Gallery extends Component {
         }
     }
 
-    Close = () =>{
+    Close = () => {
         $("#modal_buku").hide()
     }
+
+    setUser = () => {
+        // cek eksistensi dari session storage
+        if (sessionStorage.getItem("user") === null) {
+            // kondisi jika session storage "user" belum dibuat
+            let prompt = window.prompt("Masukkan Nama Anda", "")
+            if (prompt === null || prompt === "") {
+                // jika user tidak mengisikan namanya
+                this.setUser()
+            } else {
+                // jika user telah mengisikan namanya
+
+                // simpan nama user ke session storage
+                sessionStorage.setItem("user", prompt)
+
+                // simpan nama user ke state.user
+                this.setState({ user: prompt })
+            }
+        } else {
+            // kondisi saat session storage "user" telah dibuat
+
+            // akses nilai dari session storage "user"
+            let name = sessionStorage.getItem("user")
+            this.setState({ user: name })
+        }
+    }
+    componentDidMount() {
+        this.setUser()
+    }
+
+    addToCart = (selectedItem) => {
+        // membuat sebuah variabel untuk menampung cart sementara
+        let tempCart = []
+
+        // cek eksistensi dari data cart pada localStorage
+        if (localStorage.getItem("cart") !== null) {
+            tempCart = JSON.parse(localStorage.getItem("cart"))
+            // JSON.parse() digunakan untuk mengonversi dari string -> array object
+        }
+
+        // cek data yang dipilih user ke keranjang belanja
+        let existItem = tempCart.find(item => item.isbn === selectedItem.isbn)
+
+        if (existItem) {
+            // jika item yang dipilih ada pada keranjang belanja
+            window.alert("Anda telah memilih item ini")
+        } else {
+            // user diminta memasukkan jumlah item yang dibeli
+            let promptJumlah = window.prompt("Masukkan jumlah item yang beli", "")
+            if (promptJumlah !== null && promptJumlah !== "") {
+                // jika user memasukkan jumlah item yg dibeli
+
+                // menambahkan properti "jumlahBeli" pada item yang dipilih
+                selectedItem.jumlahBeli = promptJumlah
+
+                // masukkan item yg dipilih ke dalam cart
+                tempCart.push(selectedItem)
+
+                // simpan array tempCart ke localStorage
+                localStorage.setItem("cart", JSON.stringify(tempCart))
+            }
+        }
+    }
+
+
+
 
     render() {
         return (
             <div className="container"><br />
+
+
+                <h4 className="text-info my-2">
+                    Nama Pengguna: {this.state.user}
+                </h4>
                 <input type="text" className="form-control my-2" placeholder="Pencarian"
                     value={this.state.keyword}
                     onChange={ev => this.setState({ keyword: ev.target.value })}
                     onKeyUp={ev => this.searching(ev)}
                 />
+
+
+
                 <div className="row">
                     {this.state.filterBuku.map((item, index) => (
                         <Card
@@ -153,11 +227,13 @@ class Gallery extends Component {
                             cover={item.cover}
                             onEdit={() => this.Edit(item)}
                             onDrop={() => this.Drop(item)}
+                            onCart={() => this.addToCart(item)}
                         />
                     ))}
                 </div>
 
-                <button className="btn btn-success" onClick={() => this.Add()} data-toggle="modal" data-target="#modal_buku">
+
+                <button className="btn btn-success " onClick={() => this.Add()} data-toggle="modal" data-target="#modal_buku">
                     Tambah Data
                 </button>
 
@@ -173,34 +249,34 @@ class Gallery extends Component {
                                 <form onSubmit={ev => this.Save(ev)}>
                                     Judul Buku
                                     <input type="text" className="form-control mb-2"
-                                    value={this.state.judul}
-                                    onChange={ ev => this.setState({judul: ev.target.value}) }
-                                    required />
-                                    
+                                        value={this.state.judul}
+                                        onChange={ev => this.setState({ judul: ev.target.value })}
+                                        required />
+
                                     Penulis Buku
                                     <input type="text" className="form-control mb-2"
-                                    value={this.state.penulis}
-                                    onChange={ ev => this.setState({penulis: ev.target.value}) }
-                                    required />
-                                    
+                                        value={this.state.penulis}
+                                        onChange={ev => this.setState({ penulis: ev.target.value })}
+                                        required />
+
                                     Penerbit Buku
                                     <input type="text" className="form-control mb-2"
-                                    value={this.state.penerbit}
-                                    onChange={ ev => this.setState({penerbit: ev.target.value}) }
-                                    required />
-                                    
+                                        value={this.state.penerbit}
+                                        onChange={ev => this.setState({ penerbit: ev.target.value })}
+                                        required />
+
                                     Harga Buku
                                     <input type="number" className="form-control mb-2"
-                                    value={this.state.harga}
-                                    onChange={ ev => this.setState({harga: ev.target.value}) }
-                                    required />
-                                    
+                                        value={this.state.harga}
+                                        onChange={ev => this.setState({ harga: ev.target.value })}
+                                        required />
+
                                     Cover Buku
                                     <input type="url" className="form-control mb-2"
-                                    value={this.state.cover}
-                                    onChange={ ev => this.setState({cover: ev.target.value}) }
-                                    required />
- 
+                                        value={this.state.cover}
+                                        onChange={ev => this.setState({ cover: ev.target.value })}
+                                        required />
+
                                     <button className="btn btn-info btn-block" type="submit">
                                         Simpan
                                     </button>
